@@ -8,18 +8,45 @@ window = ThemedTk(theme="black")
 cell_size = 10
 
 window.title("Conways Game of Life")
-height = (window.winfo_screenheight() - 200) // cell_size * cell_size
-width = (window.winfo_screenwidth() - 200) // cell_size * cell_size
 
-window.geometry(f"{width}x{height}")
+
+def get_curr_screen_geometry():
+    """
+    Workaround to get the size of the current screen in a multi-screen setup.
+
+    Returns:
+        geometry (str): The standard Tk geometry string.
+            [width]x[height]+[left]+[top]
+    """
+    root = tk.Tk()
+    root.update_idletasks()
+    root.attributes("-fullscreen", True)
+    root.state("iconic")
+    geometry = root.winfo_geometry()
+    root.destroy()
+    return geometry
+
+
+geometry = get_curr_screen_geometry()
+resolution = geometry.split("+")[0]
+
+
+screen_height = int(resolution.split("x")[1])
+screen_width = int(resolution.split("x")[0])
+
+height = (screen_height // cell_size * cell_size) - 200
+width = (screen_width // cell_size * cell_size) - 200
+
+window.geometry(f"{width}x{height}+0+0")
+
 canvas = tk.Canvas(window, width=width, height=height, bg="black")
 
 
 def init_grid(canvas):
     grid = []
 
-    for _ in range(height // 10):
-        grid.append([0] * (width // 10))
+    for _ in range(height // cell_size):
+        grid.append([0] * (width // cell_size))
 
     grid = seed_grid(grid)
 
@@ -41,7 +68,7 @@ def seed_grid(grid):
     grid[2][2] = 1
     grid[2][0] = 1
     grid[3][1] = 1
-    grid[3][2] = 1
+    grid[3][2] = 0
     grid[3][0] = 1
     grid[4][1] = 1
 
